@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body { font-family: Roboto, Arial; margin:0; padding:0; display:flex; justify-content:center; background:#e6f0fa; }
+  #formWrapper { width:100%; max-width:480px; padding:10px 20px; background:#fff; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.1); margin:20px 0; }
+  h2{text-align:center; font-size:20px; margin-bottom:10px;} 
+  h4{text-align:center; font-size:14px; color:#555; margin:5px 0; font-weight:normal;}
+  label{display:block; font-weight:bold; margin-top:18px; font-size:14px;text-align: center;}
+  input,select,textarea{width:100%; padding:14px 12px; margin-top:5px; font-size:18px; line-height:1.4; border-radius:8px; border:1px solid #ccc; box-sizing:border-box;display: block;text-align: center;}
+  .radio-group{display:flex; gap:10px; flex-wrap:wrap; margin-top:5px;justify-content: center}
+  .radio-group label{display:flex; align-items:center; cursor:pointer; font-weight:normal;}
+  .radio-group input{width:auto; margin-right:10px; accent-color:#1a73e8;text-align: center}
+  button{background-color:#1a73e8; color:white; border:none; cursor:pointer; margin-top:15px; font-size:18px; padding:16px; border-radius:8px; width:100%;}
+  button:disabled{background-color:#ccc; cursor:not-allowed;}
+  .hidden{display:none;}
+  #targaMsg,#alertObbligatorio{font-weight:bold; margin-top:5px; color:red; font-size:14px;text-align: center}
+  #successOverlay{display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(255,255,255,0.95); z-index:100; text-align:center; padding:50px 20px; font-size:22px; font-weight:bold; color:green; max-width:90%; max-height:80%; overflow-y:auto; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.2);}
+</style>
+</head>
+<body onload="init()">
+  <div id="formWrapper">
+    <h2>MODULO PRENOTAZIONE APPUNTAMENTO SOSTITUZIONE GOMME STAGIONALI</h2>
+    <h4>PALAMINI AUTO, Via San Luigi 1/A, Cesano Maderno</h4>
+    <h4>Si ricorda di rispettare l'orario scelto, grazie.</h4>
+
+    <form id="prenotaForm" oninput="aggiornaStatoPrenota(); return false;">
+      <label>TIPOLOGIA CLIENTE:</label>
+      <div class="radio-group">
+        <label><input type="radio" name="tipologiacliente" value="PRIVATO" onchange="aggiornaVisibilita()">PRIVATO</label>
+        <label><input type="radio" name="tipologiacliente" value="ARVAL" onchange="aggiornaVisibilita()">ARVAL</label>
+        <label><input type="radio" name="tipologiacliente" value="UNIPOLRENTAL" onchange="aggiornaVisibilita()">UNIPOLRENTAL</label>
+        <label><input type="radio" name="tipologiacliente" value="ALTRI" onchange="aggiornaVisibilita()">ALTRI NOLEGGI</label>
+      </div>
+
+      <div id="depositoContainer" class="hidden">
+        <label>ABBIAMO GLI PNEUMATICI IN DEPOSITO NELLA NOSTRA SEDE?</label>
+        <div class="radio-group">
+          <label><input type="radio" name="dep" value="SI" onchange="aggiornaCampi()">SI</label>
+          <label><input type="radio" name="dep" value="NO" onchange="aggiornaCampi()">NO</label>
+        </div>
+        <div id="msgDepNo" style="display:none; color:red; font-size:14px; margin-top:8px;text-align:center">
+          ⚠️ Si ricorda di portare gli pneumatici il giorno dell'appuntamento
+        </div>
+      </div>
+
+      <div id="campiAuto" class="hidden">
+        <label>TARGA AUTO:</label>
+        <input type="text" id="targa" maxlength="7" oninput="checkTargaInput(this)">
+        <div id="targaMsg">✏️ Inserisci la targa (7 caratteri)</div>
+
+        <label>MARCA E MODELLO AUTO:</label>
+        <input type="text" id="marcaModello">
+
+        <div id="kmautoContainer">
+          <label>KM AUTO:</label>
+          <input type="text" id="kmauto">
+        </div>
+      </div>
+
+      <div id="campiContatti" class="hidden">
+        <label>NOME E COGNOME:</label>
+        <input type="text" id="nomeCognome" onchange="aggiornaStatoPrenota()">
+
+        <label>EMAIL:</label>
+        <input type="email" id="email" inputmode="email" autocomplete="email" onchange="aggiornaStatoPrenota()">
+
+        <label>CONTATTO TELEFONICO:</label>
+        <input type="text" id="telefono" inputmode="tel" autocomplete="tel" onchange="aggiornaStatoPrenota()">
+
+        <label>TIPO DI APPUNTAMENTO:</label>
+        <div class="radio-group">
+          <label><input type="radio" name="tipoAppuntamento" value="1 ORA DI FERMO AUTO" onchange="aggiornaDateDisponibili()">1 ORA DI FERMO AUTO</label>
+          <label><input type="radio" name="tipoAppuntamento" value="3 ORE DI FERMO AUTO" onchange="aggiornaDateDisponibili()">3 ORE DI FERMO AUTO</label>
+        </div>
+
+        <label>DATA APPUNTAMENTO:</label>
+        <select id="dataAppuntamento" onchange="aggiornaStatoPrenota()">
+          <option value="">Seleziona...</option>
+        </select>
+      </div>
+
+      <div id="alertObbligatorio">❌ Attenzione: tutti i campi sono obbligatori</div>
+      <button type="button" id="prenota" onclick="invia()" disabled>Prenota</button>
+    </form>
+  </div>
+
+  <div id="successOverlay">APPUNTAMENTO CONFERMATO! Riceverete una copia all'indirizzo email indicato!</div>
+
+<script>
+// ⚠️ IMPORTANTE: Sostituisci questo URL con quello del tuo Apps Script deployato
+const API_URL = 'https://script.google.com/macros/s/AKfycbyp-uphcz9vpPIHmCpdAW_47B2vKn6bh0GJqoxsz9MOW3fxEOx7bFKbHVbYfzxWgNygKw/exec';
+
+let dbTarghe = {}, date1ora = [], date3ore = [], targaValida = false, targaQuantita = 0;
+
+async function init(){
+  try {
+    // Carica database targhe
+    const dbResponse = await fetch(API_URL + '?action=getDatabase');
+    const dbData = await dbResponse.json();
+    dbTarghe = dbData || {};
+
+    // Carica date disponibili
+    const dateResponse = await fetch(API_URL + '?action=getDateDisponibili');
+    const dateData = await dateResponse.json();
+    date1ora = dateData && dateData["1h"] ? dateData["1h"] : [];
+    date3ore = dateData && dateData["3h"] ? dateData["3h"] : [];
+  } catch(error) {
+    console.error('Errore caricamento dati:', error);
+    alert('Errore nel caricamento dei dati. Riprova più tardi.');
+  }
+
+  document.getElementById("depositoContainer").classList.add("hidden");
+  document.getElementById("campiAuto").classList.add("hidden");
+  document.getElementById("campiContatti").classList.add("hidden");
+  document.getElementById("kmautoContainer").classList.remove("hidden");
+  document.getElementById("msgDepNo").style.display = "none";
+  aggiornaStatoPrenota();
+}
+
+function aggiornaVisibilita(){
+  const cliente = document.querySelector('input[name="tipologiacliente"]:checked')?.value;
+  const depositoContainer = document.getElementById("depositoContainer");
+  const campiAuto = document.getElementById("campiAuto");
+  const campiContatti = document.getElementById("campiContatti");
+  const kmautoContainer = document.getElementById("kmautoContainer");
+
+  if(cliente === "PRIVATO"){
+    depositoContainer.classList.remove("hidden");
+    campiAuto.classList.add("hidden");
+    campiContatti.classList.add("hidden");
+    kmautoContainer.classList.add("hidden");
+  } else {
+    depositoContainer.classList.add("hidden");
+    campiAuto.classList.remove("hidden");
+    campiContatti.classList.remove("hidden");
+    kmautoContainer.classList.remove("hidden");
+  }
+
+  document.querySelectorAll('input[name="dep"]').forEach(el => el.checked = false);
+  document.getElementById("msgDepNo").style.display = "none";
+  targaValida = false;
+  document.getElementById("targaMsg").innerHTML = "✏️ Inserisci la targa (7 caratteri)";
+  aggiornaStatoPrenota();
+}
+
+function aggiornaCampi(){
+  const dep = document.querySelector('input[name="dep"]:checked')?.value;
+  const campiAuto = document.getElementById("campiAuto");
+  const campiContatti = document.getElementById("campiContatti");
+
+  if(dep === "SI" || dep === "NO"){
+    campiAuto.classList.remove("hidden");
+    campiContatti.classList.remove("hidden");
+  } else {
+    campiAuto.classList.add("hidden");
+    campiContatti.classList.add("hidden");
+  }
+
+  const msg = document.getElementById("msgDepNo");
+  msg.style.display = dep === "NO" ? "block" : "none";
+  targaValida = false;
+  aggiornaStatoPrenota();
+}
+
+function checkTargaInput(input) {
+  input = input || document.getElementById("targa");
+  const t = input.value.trim().toUpperCase();
+  const marcaInput = document.getElementById("marcaModello");
+  const msg = document.getElementById("targaMsg");
+
+  const cliente = document.querySelector('input[name="tipologiacliente"]:checked')?.value;
+  const dep = document.querySelector('input[name="dep"]:checked')?.value;
+  const manual = (cliente === "PRIVATO" && dep === "NO");
+
+  if (manual) {
+    if (t.length === 7) {
+      targaValida = true;
+      input.style.borderColor = "green";
+      msg.innerHTML = "✅ Targa valida";
+    } else {
+      targaValida = false;
+      input.style.borderColor = "";
+      msg.innerHTML = "✏️ Inserisci la targa (7 caratteri)";
+    }
+  } else {
+    if (t.length !== 7) {
+      targaValida = false;
+      input.style.borderColor = "";
+      msg.innerHTML = "✏️ Inserisci la targa (7 caratteri)";
+    } else {
+      if (dbTarghe && dbTarghe[t]) {
+        targaQuantita = dbTarghe[t].quantita || 0;
+        marcaInput.value = dbTarghe[t].modello || "";
+        input.style.borderColor = "green";
+        if (targaQuantita >= 4) {
+          msg.innerHTML = "✅ Targa valida. Ci sono " + targaQuantita + " pneumatici in deposito";
+          targaValida = true;
+        } else {
+          msg.innerHTML = "⚠️ Targa valida. Ci sono solo " + targaQuantita + " pneumatici in deposito. È necessario passare in officina per prendere appuntamento.";
+          targaValida = false;
+        }
+      } else {
+        targaValida = false;
+        input.style.borderColor = "red";
+        msg.innerHTML = "❌ Targa non trovata in deposito. È necessario passare in officina per prendere appuntamento.";
+      }
+    }
+  }
+  aggiornaStatoPrenota();
+}
+
+function aggiornaDateDisponibili(){
+  const tipo = document.querySelector('input[name="tipoAppuntamento"]:checked')?.value;
+  const select = document.getElementById("dataAppuntamento");
+  select.innerHTML = '<option value="">Seleziona...</option>';
+  let lista = tipo === "1 ORA DI FERMO AUTO" ? date1ora : tipo === "3 ORE DI FERMO AUTO" ? date3ore : [];
+  lista.forEach(d => {
+    const option = document.createElement("option");
+    option.value = d;
+    option.textContent = d;
+    select.appendChild(option);
+  });
+  aggiornaStatoPrenota();
+}
+
+function aggiornaStatoPrenota(){
+  const btn = document.getElementById("prenota");
+  const targaOk = targaValida;
+  const dataOk = document.getElementById("dataAppuntamento").value.trim() !== "";
+  const telOk = document.getElementById("telefono").value.trim() !== "";
+  const emailOk = document.getElementById("email").value.trim() !== "";
+
+  btn.disabled = !(targaOk && dataOk && telOk && emailOk);
+  document.getElementById("alertObbligatorio").style.display = (targaOk && dataOk && telOk && emailOk) ? "none" : "block";
+}
+
+async function invia(){
+  const btn = document.getElementById("prenota");
+  btn.disabled = true;
+  btn.textContent = "Invio in corso, attendere...";
+
+  const dati = {
+    tipologiacliente: document.querySelector('input[name="tipologiacliente"]:checked')?.value || "",
+    dep: document.querySelector('input[name="dep"]:checked')?.value || "",
+    targa: document.getElementById("targa").value.trim(),
+    marcaModello: document.getElementById("marcaModello").value.trim(),
+    kmauto: document.getElementById("kmauto").value.trim(),
+    nomeCognome: document.getElementById("nomeCognome").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    telefono: document.getElementById("telefono").value.trim(),
+    tipoAppuntamento: document.querySelector('input[name="tipoAppuntamento"]:checked')?.value || "",
+    dataAppuntamento: document.getElementById("dataAppuntamento").value
+  };
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'salvaPrenotazione', dati: dati })
+    });
+
+    const result = await response.json();
+
+    if(result.success) {
+      setTimeout(() => {
+        document.getElementById("formWrapper").style.display="none";
+        const overlay = document.getElementById("successOverlay");
+        overlay.style.display="block";
+        overlay.scrollIntoView({behavior:"smooth", block:"center"});
+      }, 1000);
+    } else {
+      alert('Errore nel salvataggio: ' + (result.error || 'Errore sconosciuto'));
+      btn.disabled = false;
+      btn.textContent = "Prenota";
+    }
+  } catch(error) {
+    console.error('Errore:', error);
+    alert('Errore nella comunicazione con il server. Riprova.');
+    btn.disabled = false;
+    btn.textContent = "Prenota";
+  }
+}
+</script>
+</body>
+</html>
