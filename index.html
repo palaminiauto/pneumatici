@@ -118,28 +118,39 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbyp-uphcz9vpPIHmCpdAW_4
 let dbTarghe = {}, date1ora = [], date3ore = [], targaValida = false, targaQuantita = 0;
 
 async function init(){
+  const loadingScreen = document.getElementById("loadingScreen");
+  const formWrapper = document.getElementById("formWrapper");
+  
   try {
-    // Carica database targhe
-    const dbResponse = await fetch(API_URL + '?action=getDatabase');
-    const dbData = await dbResponse.json();
-    dbTarghe = dbData || {};
-
-    // Carica date disponibili
-    const dateResponse = await fetch(API_URL + '?action=getDateDisponibili');
-    const dateData = await dateResponse.json();
-    date1ora = dateData && dateData["1h"] ? dateData["1h"] : [];
-    date3ore = dateData && dateData["3h"] ? dateData["3h"] : [];
+    // UNA SOLA chiamata che prende TUTTO (database + date)
+    const response = await fetch(API_URL + '?action=getAllData');
+    const data = await response.json();
+    
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    
+    // Salva i dati in memoria
+    dbTarghe = data.database || {};
+    date1ora = data.date && data.date["1h"] ? data.date["1h"] : [];
+    date3ore = data.date && data.date["3h"] ? data.date["3h"] : [];
+    
+    console.log('Dati caricati:', Object.keys(dbTarghe).length, 'targhe');
+    console.log('Date 1h:', date1ora.length, 'Date 3h:', date3ore.length);
+    
   } catch(error) {
     console.error('Errore caricamento dati:', error);
     alert('Errore nel caricamento dei dati. Riprova più tardi.');
+    return;
   }
 
-  // Nascondi loading e mostra form dopo 2 secondi
+  // Aspetta minimo 1 secondo per mostrare il loading
   setTimeout(() => {
-    document.getElementById("loadingScreen").style.display = "none";
-    document.getElementById("formWrapper").style.display = "block";
-  }, 2000);
+    loadingScreen.style.display = "none";
+    formWrapper.style.display = "block";
+  }, 1000);
 
+  // Imposta stato iniziale form
   document.getElementById("depositoContainer").classList.add("hidden");
   document.getElementById("campiAuto").classList.add("hidden");
   document.getElementById("campiContatti").classList.add("hidden");
