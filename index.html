@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PNEUMATICI</title>
+<title>Prenotazione Gomme - Palamini Auto</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <style>
   body { font-family: Roboto, Arial; margin:0; padding:0; display:flex; justify-content:center; background:#e6f0fa; font-size:16px; }
   #formWrapper { width:100%; max-width:480px; padding:10px 20px; background:#fff; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.1); margin:20px 0; }
@@ -113,8 +115,9 @@
   <div id="successOverlay">APPUNTAMENTO CONFERMATO! Riceverete una copia all'indirizzo email indicato!</div>
 
 <script>
-// ⚠️ IMPORTANTE: Sostituisci questo URL con quello del tuo Apps Script deployato
-const API_URL = 'https://script.google.com/macros/s/AKfycbyp-uphcz9vpPIHmCpdAW_47B2vKn6bh0GJqoxsz9MOW3fxEOx7bFKbHVbYfzxWgNygKw/exec';
+// ⚠️ IMPORTANTE: Sostituisci questo URL con quello del tuo NUOVO deployment Apps Script
+// Deve essere il deployment con "Who has access: Anyone"
+const API_URL = 'https://script.google.com/macros/s/AKfycbwo7KNaTHkDrpbvK6u_uzYXlZgh-4VoizoTnGCijEcxFB4g_3T5zu29UWi7QSE2SICJqQ/exec';
 
 let dbTarghe = {}, date1ora = [], date3ore = [], targaValida = false, targaQuantita = 0;
 
@@ -295,14 +298,21 @@ async function invia(){
     dataAppuntamento: document.getElementById("dataAppuntamento").value
   };
 
+  console.log('Invio dati a:', API_URL);
+  console.log('Dati:', dati);
+
   try {
+    // Rimuovo Content-Type header che può causare problemi CORS
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'salvaPrenotazione', dati: dati })
     });
 
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+
     const result = await response.json();
+    console.log('Risultato:', result);
 
     if(result.success) {
       setTimeout(() => {
@@ -317,8 +327,8 @@ async function invia(){
       btn.textContent = "Prenota";
     }
   } catch(error) {
-    console.error('Errore:', error);
-    alert('Errore nella comunicazione con il server. Riprova.');
+    console.error('Errore completo:', error);
+    alert('Errore nella comunicazione con il server: ' + error.message + '\n\nVerifica di aver aggiornato il deployment.');
     btn.disabled = false;
     btn.textContent = "Prenota";
   }
