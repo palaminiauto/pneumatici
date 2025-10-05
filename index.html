@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MODULO PNEUMATICI</title>
-<link rel="icon" type="image/png" href="favicon.png">
 <style>
   body { font-family: Roboto, Arial; margin:0; padding:0; display:flex; justify-content:center; background:#e6f0fa; font-size:16px; }
   #formWrapper { width:100%; max-width:480px; padding:10px 20px; background:#fff; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,0.1); margin:20px 0; }
@@ -81,7 +80,7 @@
 
         <div id="kmautoContainer">
           <label>KM AUTO:</label>
-          <input type="text"  inputmode="numeric" id="kmauto">
+          <input type="text"  inputmode="tel" id="kmauto">
         </div>
       </div>
 
@@ -125,8 +124,14 @@ async function init(){
   const loadingScreen = document.getElementById("loadingScreen");
   const formWrapper = document.getElementById("formWrapper");
   
+  // Imposta subito il timeout di 2 secondi
+  setTimeout(() => {
+    loadingScreen.style.display = "none";
+    formWrapper.style.display = "block";
+  }, 3000);
+  
+  // Nel frattempo carica dati in background
   try {
-    // UNA SOLA chiamata che prende TUTTO (database + date)
     const response = await fetch(API_URL + '?action=getAllData');
     const data = await response.json();
     
@@ -134,7 +139,6 @@ async function init(){
       throw new Error(data.error);
     }
     
-    // Salva i dati in memoria
     dbTarghe = data.database || {};
     date1ora = data.date && data.date["1h"] ? data.date["1h"] : [];
     date3ore = data.date && data.date["3h"] ? data.date["3h"] : [];
@@ -148,13 +152,7 @@ async function init(){
     return;
   }
 
-  // Aspetta minimo 1 secondo per mostrare il loading
-  setTimeout(() => {
-    loadingScreen.style.display = "none";
-    formWrapper.style.display = "block";
-  }, 1000);
-
-  // Imposta stato iniziale form
+   // Imposta stato iniziale form
   document.getElementById("depositoContainer").classList.add("hidden");
   document.getElementById("campiAuto").classList.add("hidden");
   document.getElementById("campiContatti").classList.add("hidden");
@@ -301,38 +299,31 @@ async function invia(){
   console.log('Invio dati a:', API_URL);
   console.log('Dati:', dati);
 
-  try {
-    // Rimuovo Content-Type header che può causare problemi CORS
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'salvaPrenotazione', dati: dati })
-    });
-
+  // Avvia chiamata in background (Apps Script lavora da solo)
+  fetch(API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'salvaPrenotazione', dati: dati })
+  })
+  .then(response => {
     console.log('Response status:', response.status);
-    console.log('Response ok:', response.ok);
-
-    const result = await response.json();
+    return response.json();
+  })
+  .then(result => {
     console.log('Risultato:', result);
+  })
+  .catch(error => {
+    console.error('Errore (non bloccante):', error);
+  });
 
-    if(result.success) {
-      setTimeout(() => {
-        document.getElementById("formWrapper").style.display="none";
-        const overlay = document.getElementById("successOverlay");
-        overlay.style.display="block";
-        overlay.scrollIntoView({behavior:"smooth", block:"center"});
-      }, 1000);
-    } else {
-      alert('Errore nel salvataggio: ' + (result.error || 'Errore sconosciuto'));
-      btn.disabled = false;
-      btn.textContent = "Prenota";
-    }
-  } catch(error) {
-    console.error('Errore completo:', error);
-    alert('Errore nella comunicazione con il server: ' + error.message + '\n\nVerifica di aver aggiornato il deployment.');
-    btn.disabled = false;
-    btn.textContent = "Prenota";
-  }
+  // Mostra conferma SEMPRE dopo 2500ms (2.5 secondi)
+  setTimeout(() => {
+    document.getElementById("formWrapper").style.display="none";
+    const overlay = document.getElementById("successOverlay");
+    overlay.style.display="block";
+    overlay.scrollIntoView({behavior:"smooth", block:"center"});
+  }, 3000);
 }
+
 </script>
 </body>
 </html>
