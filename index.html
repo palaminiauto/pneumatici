@@ -299,14 +299,15 @@ function checkTargaInput(input) {
       msg.innerHTML = "✏️ Inserisci la targa (7 caratteri)";
     } else {
       if (dbTarghe && dbTarghe[t]) {
+        depohtml = dbTarghe[t].depo || "nd";
         targaQuantita = dbTarghe[t].quantita || 0;
         marcaInput.value = dbTarghe[t].modello || "";
         input.style.borderColor = "green";
         if (targaQuantita >= 4) {
-          msg.innerHTML = "✅ Targa valida. Ci sono " + targaQuantita + " pneumatici in deposito";
+          msg.innerHTML = "✅ Targa valida. Ci sono " + targaQuantita + " pneumatici in deposito (" + depohtml +");
           targaValida = true;
         } else {
-          msg.innerHTML = "⚠️ Targa valida. Ci sono solo " + targaQuantita + " pneumatici in deposito. È necessario passare in officina per prendere appuntamento.";
+          msg.innerHTML = "⚠️ Targa valida. Ci sono solo " + targaQuantita + " pneumatici in deposito. È necessario passare in officina per prendere appuntamento (" + depohtml +");
           targaValida = false;
         }
       } else {
