@@ -11,9 +11,21 @@
   h4{text-align:center; font-size:16px; color:#555; margin:5px 0; font-weight:normal;}
   label{display:block; font-weight:bold; margin-top:18px; font-size:16px;text-align: center;}
   input,select,textarea{width:100%; padding:16px 14px; margin-top:5px; font-size:20px; line-height:1.4; border-radius:8px; border:1px solid #ccc; box-sizing:border-box;display: block;text-align: center;}
-  .radio-group{display:flex; gap:12px; flex-wrap:wrap; margin-top:5px;justify-content: center}
-  .radio-group label{display:flex; align-items:center; cursor:pointer; font-weight:normal; font-size:17px;}
-  .radio-group input{width:auto; margin-right:8px; accent-color:#1a73e8;text-align: center; transform:scale(1.3);}
+  
+  /* STILE BOTTONI TIPOLOGIA CLIENTE */
+  .button-group{display:flex; gap:12px; margin-top:10px; justify-content:center;}
+  .button-group input[type="radio"]{display:none;}
+  .button-group label{flex:1; padding:16px 20px; background:#f0f0f0; border:2px solid #ddd; border-radius:10px; text-align:center; cursor:pointer; font-weight:600; font-size:18px; transition:all 0.3s ease; margin:0;}
+  .button-group input[type="radio"]:checked + label{background:#1a73e8; color:white; border-color:#1a73e8; box-shadow:0 4px 12px rgba(26,115,232,0.3);}
+  .button-group label:hover{transform:translateY(-2px); box-shadow:0 4px 8px rgba(0,0,0,0.1);}
+  
+  /* STILE BOTTONI DEPOSITO */
+  .radio-group{display:flex; gap:12px; margin-top:10px; justify-content:center;}
+  .radio-group input[type="radio"]{display:none;}
+  .radio-group label{flex:1; padding:14px 20px; background:#f0f0f0; border:2px solid #ddd; border-radius:8px; text-align:center; cursor:pointer; font-weight:600; font-size:17px; transition:all 0.3s ease; margin:0;}
+  .radio-group input[type="radio"]:checked + label{background:#1a73e8; color:white; border-color:#1a73e8;}
+  .radio-group label:hover{transform:scale(1.02);}
+  
   button{background-color:#1a73e8; color:white; border:none; cursor:pointer; margin-top:15px; font-size:20px; padding:18px; border-radius:8px; width:100%;}
   button:disabled{background-color:#ccc; cursor:not-allowed;}
   .hidden{display:none;}
@@ -30,8 +42,8 @@
     h4{font-size:17px;}
     label{font-size:17px;}
     input,select,textarea{font-size:22px; padding:18px 16px;}
-    .radio-group label{font-size:18px;}
-    .radio-group input{transform:scale(1.5);}
+    .button-group label{font-size:16px; padding:14px 16px;}
+    .radio-group label{font-size:16px; padding:12px 16px;}
     button{font-size:22px; padding:20px;}
     #targaMsg,#alertObbligatorio{font-size:17px;}
     #loadingScreen h3{font-size:28px;}
@@ -52,18 +64,22 @@
 
     <form id="prenotaForm" oninput="aggiornaStatoPrenota(); return false;">
       <label>TIPOLOGIA CLIENTE:</label>
-      <div class="radio-group">
-        <label><input type="radio" name="tipologiacliente" value="PRIVATO" onchange="aggiornaVisibilita()">PRIVATO</label>
-        <label><input type="radio" name="tipologiacliente" value="ARVAL" onchange="aggiornaVisibilita()">ARVAL</label>
-        <label><input type="radio" name="tipologiacliente" value="UNIPOLRENTAL" onchange="aggiornaVisibilita()">UNIPOLRENTAL</label>
-        <label><input type="radio" name="tipologiacliente" value="ALTRI" onchange="aggiornaVisibilita()">ALTRI NOLEGGI</label>
+      <div class="button-group">
+        <input type="radio" name="tipologiacliente" value="PRIVATO" id="tipPrivato" onchange="aggiornaVisibilita()">
+        <label for="tipPrivato">PRIVATO</label>
+        
+        <input type="radio" name="tipologiacliente" value="NOLEGGI" id="tipNoleggi" onchange="aggiornaVisibilita()">
+        <label for="tipNoleggi">NOLEGGI<br><small style="font-size:13px;">(Arval, UnipolRental, Leasys etc.)</small></label>
       </div>
 
       <div id="depositoContainer" class="hidden">
         <label>ABBIAMO GLI PNEUMATICI IN DEPOSITO NELLA NOSTRA SEDE?</label>
         <div class="radio-group">
-          <label><input type="radio" name="dep" value="SI" onchange="aggiornaCampi()">SI</label>
-          <label><input type="radio" name="dep" value="NO" onchange="aggiornaCampi()">NO</label>
+          <input type="radio" name="dep" value="SI" id="depSi" onchange="aggiornaCampi()">
+          <label for="depSi">SI</label>
+          
+          <input type="radio" name="dep" value="NO" id="depNo" onchange="aggiornaCampi()">
+          <label for="depNo">NO</label>
         </div>
         <div id="msgDepNo" style="display:none; color:red; font-size:14px; margin-top:8px;text-align:center">
           ⚠️ Si ricorda di portare gli pneumatici il giorno dell'appuntamento
@@ -77,11 +93,6 @@
 
         <label>MARCA E MODELLO AUTO:</label>
         <input type="text" id="marcaModello">
-
-        <div id="kmautoContainer">
-          <label>KM AUTO:</label>
-          <input type="text"  inputmode="tel" id="kmauto">
-        </div>
       </div>
 
       <div id="campiContatti" class="hidden">
@@ -93,12 +104,6 @@
 
         <label>CONTATTO TELEFONICO:</label>
         <input type="text" id="telefono" inputmode="tel" autocomplete="tel" onchange="aggiornaStatoPrenota()">
-
-        <label>TIPO DI APPUNTAMENTO:</label>
-        <div class="radio-group">
-          <label><input type="radio" name="tipoAppuntamento" value="1 ORA DI FERMO AUTO" onchange="aggiornaDateDisponibili()">1 ORA DI FERMO AUTO</label>
-          <label><input type="radio" name="tipoAppuntamento" value="3 ORE DI FERMO AUTO" onchange="aggiornaDateDisponibili()">3 ORE DI FERMO AUTO</label>
-        </div>
 
         <label>DATA APPUNTAMENTO:</label>
         <select id="dataAppuntamento" onchange="aggiornaStatoPrenota()">
@@ -114,21 +119,19 @@
   <div id="successOverlay">APPUNTAMENTO CONFERMATO! Riceverete una copia all'indirizzo email indicato!</div>
 
 <script>
-// ⚠️ IMPORTANTE: Sostituisci questo URL con quello del tuo NUOVO deployment Apps Script
-// Deve essere il deployment con "Who has access: Anyone"
 const API_URL = 'https://script.google.com/macros/s/AKfycbwo7KNaTHkDrpbvK6u_uzYXlZgh-4VoizoTnGCijEcxFB4g_3T5zu29UWi7QSE2SICJqQ/exec';
 
-let dbTarghe = {}, date1ora = [], date3ore = [], targaValida = false, targaQuantita = 0;
+let dbTarghe = {}, dateDisponibili = [], targaValida = false, targaQuantita = 0;
 
 async function init(){
   const loadingScreen = document.getElementById("loadingScreen");
   const formWrapper = document.getElementById("formWrapper");
   
-  // Imposta subito il timeout di 2 secondi
+  // Caricamento finto di 5 secondi
   setTimeout(() => {
     loadingScreen.style.display = "none";
     formWrapper.style.display = "block";
-  }, 3000);
+  }, 5000);
   
   // Nel frattempo carica dati in background
   try {
@@ -140,11 +143,18 @@ async function init(){
     }
     
     dbTarghe = data.database || {};
-    date1ora = data.date && data.date["1h"] ? data.date["1h"] : [];
-    date3ore = data.date && data.date["3h"] ? data.date["3h"] : [];
+    
+    // Unisci e ordina le date
+    const date1ora = data.date && data.date["1h"] ? data.date["1h"] : [];
+    const date3ore = data.date && data.date["3h"] ? data.date["3h"] : [];
+    
+    dateDisponibili = unisciEOrdinaDate(date1ora, date3ore);
     
     console.log('Dati caricati:', Object.keys(dbTarghe).length, 'targhe');
-    console.log('Date 1h:', date1ora.length, 'Date 3h:', date3ore.length);
+    console.log('Date disponibili:', dateDisponibili.length);
+    
+    // Popola dropdown date
+    popolaDateDropdown();
     
   } catch(error) {
     console.error('Errore caricamento dati:', error);
@@ -152,13 +162,72 @@ async function init(){
     return;
   }
 
-   // Imposta stato iniziale form
+  // Imposta stato iniziale form
   document.getElementById("depositoContainer").classList.add("hidden");
   document.getElementById("campiAuto").classList.add("hidden");
   document.getElementById("campiContatti").classList.add("hidden");
-  document.getElementById("kmautoContainer").classList.remove("hidden");
   document.getElementById("msgDepNo").style.display = "none";
   aggiornaStatoPrenota();
+}
+
+function unisciEOrdinaDate(date1ora, date3ore) {
+  const months = {
+    "gennaio": 0, "febbraio": 1, "marzo": 2, "aprile": 3, "maggio": 4, "giugno": 5,
+    "luglio": 6, "agosto": 7, "settembre": 8, "ottobre": 9, "novembre": 10, "dicembre": 11
+  };
+
+  function parseDateString(str) {
+    if (!str) return null;
+    const parts = str.toLowerCase().split(" ");
+    const day = parseInt(parts[1]);
+    const month = months[parts[2]];
+    const now = new Date();
+    const year = now.getFullYear();
+    const [hours, minutes] = parts[3].split(":").map(Number);
+    return new Date(year, month, day, hours, minutes);
+  }
+
+  const allDatesWithText = [];
+
+  // Aggiungi date da 1 ora con prefisso
+  date1ora.forEach(d => {
+    const dateObj = parseDateString(d);
+    if (dateObj) {
+      allDatesWithText.push({
+        date: dateObj,
+        text: "1 ORA fermo auto: " + d
+      });
+    }
+  });
+
+  // Aggiungi date da 3 ore con prefisso
+  date3ore.forEach(d => {
+    const dateObj = parseDateString(d);
+    if (dateObj) {
+      allDatesWithText.push({
+        date: dateObj,
+        text: "3 ORE fermo auto: " + d
+      });
+    }
+  });
+
+  // Ordina per data
+  allDatesWithText.sort((a, b) => a.date - b.date);
+
+  // Estrai solo il testo
+  return allDatesWithText.map(item => item.text);
+}
+
+function popolaDateDropdown() {
+  const select = document.getElementById("dataAppuntamento");
+  select.innerHTML = '<option value="">Seleziona...</option>';
+  
+  dateDisponibili.forEach(d => {
+    const option = document.createElement("option");
+    option.value = d;
+    option.textContent = d;
+    select.appendChild(option);
+  });
 }
 
 function aggiornaVisibilita(){
@@ -166,18 +235,15 @@ function aggiornaVisibilita(){
   const depositoContainer = document.getElementById("depositoContainer");
   const campiAuto = document.getElementById("campiAuto");
   const campiContatti = document.getElementById("campiContatti");
-  const kmautoContainer = document.getElementById("kmautoContainer");
 
   if(cliente === "PRIVATO"){
     depositoContainer.classList.remove("hidden");
     campiAuto.classList.add("hidden");
     campiContatti.classList.add("hidden");
-    kmautoContainer.classList.add("hidden");
-  } else {
+  } else if(cliente === "NOLEGGI") {
     depositoContainer.classList.add("hidden");
     campiAuto.classList.remove("hidden");
     campiContatti.classList.remove("hidden");
-    kmautoContainer.classList.remove("hidden");
   }
 
   document.querySelectorAll('input[name="dep"]').forEach(el => el.checked = false);
@@ -253,20 +319,6 @@ function checkTargaInput(input) {
   aggiornaStatoPrenota();
 }
 
-function aggiornaDateDisponibili(){
-  const tipo = document.querySelector('input[name="tipoAppuntamento"]:checked')?.value;
-  const select = document.getElementById("dataAppuntamento");
-  select.innerHTML = '<option value="">Seleziona...</option>';
-  let lista = tipo === "1 ORA DI FERMO AUTO" ? date1ora : tipo === "3 ORE DI FERMO AUTO" ? date3ore : [];
-  lista.forEach(d => {
-    const option = document.createElement("option");
-    option.value = d;
-    option.textContent = d;
-    select.appendChild(option);
-  });
-  aggiornaStatoPrenota();
-}
-
 function aggiornaStatoPrenota(){
   const btn = document.getElementById("prenota");
   const targaOk = targaValida;
@@ -288,18 +340,15 @@ async function invia(){
     dep: document.querySelector('input[name="dep"]:checked')?.value || "",
     targa: document.getElementById("targa").value.trim(),
     marcaModello: document.getElementById("marcaModello").value.trim(),
-    kmauto: document.getElementById("kmauto").value.trim(),
     nomeCognome: document.getElementById("nomeCognome").value.trim(),
     email: document.getElementById("email").value.trim(),
     telefono: document.getElementById("telefono").value.trim(),
-    tipoAppuntamento: document.querySelector('input[name="tipoAppuntamento"]:checked')?.value || "",
     dataAppuntamento: document.getElementById("dataAppuntamento").value
   };
 
   console.log('Invio dati a:', API_URL);
   console.log('Dati:', dati);
 
-  // Avvia chiamata in background (Apps Script lavora da solo)
   fetch(API_URL, {
     method: 'POST',
     body: JSON.stringify({ action: 'salvaPrenotazione', dati: dati })
@@ -315,7 +364,6 @@ async function invia(){
     console.error('Errore (non bloccante):', error);
   });
 
-  // Mostra conferma SEMPRE dopo 2500ms (2.5 secondi)
   setTimeout(() => {
     document.getElementById("formWrapper").style.display="none";
     const overlay = document.getElementById("successOverlay");
@@ -323,7 +371,6 @@ async function invia(){
     overlay.scrollIntoView({behavior:"smooth", block:"center"});
   }, 3000);
 }
-
 </script>
 </body>
 </html>
