@@ -116,7 +116,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbwo7KNaTHkDrpbvK6u_uzYX
 let dbTarghe = {}, dateDisponibili = [], targaValida = false, targaQuantita = 0;
 
 async function init(){
-  const loadingScreen = document.getElementById("loadingScreen");
+  const loadingScreen = document.getElementById("loadingOverlay");
   const formWrapper = document.getElementById("formWrapper");
   
   // Caricamento finto di 5 secondi
