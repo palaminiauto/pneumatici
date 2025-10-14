@@ -308,10 +308,10 @@ function checkTargaInput(input) {
         marcaInput.value = dbTarghe[t].modello || "";
         input.style.borderColor = "green";
         if (targaQuantita >= 4) {
-          msg.innerHTML = "✅ Targa valida. Ci sono " + targaQuantita + " pneumatici in deposito (" + depohtml +");
+          msg.innerHTML = "✅ Targa valida. Ci sono " + targaQuantita + " pneumatici in deposito (" + depohtml +")";
           targaValida = true;
         } else {
-          msg.innerHTML = "⚠️ Targa valida. Ci sono solo " + targaQuantita + " pneumatici in deposito. È necessario passare in officina per prendere appuntamento (" + depohtml +");
+          msg.innerHTML = "⚠️ Targa valida. Ci sono solo " + targaQuantita + " pneumatici in deposito. È necessario passare in officina per prendere appuntamento (" + depohtml +")";
           targaValida = false;
         }
       } else {
