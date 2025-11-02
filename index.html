@@ -119,6 +119,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbwo7KNaTHkDrpbvK6u_uzYX
 let dbTarghe = {}, dateDisponibili = [], targaValida = false, targaQuantita = 0;
 
 
+
 async function init(){
   const loadingScreen = document.getElementById("loadingOverlay");
   const formWrapper = document.getElementById("formWrapper");
@@ -156,14 +157,6 @@ async function init(){
     alert('Errore nel caricamento dei dati. Riprova più tardi.');
     return;
   }
-
-  // Imposta stato iniziale form
-  document.getElementById("depositoContainer").classList.add("hidden");
-  document.getElementById("campiAuto").classList.add("hidden");
-  document.getElementById("campiContatti").classList.add("hidden");
-  document.getElementById("msgDepNo").style.display = "none";
-  aggiornaStatoPrenota();
-}
 
   // Imposta stato iniziale form
   document.getElementById("depositoContainer").classList.add("hidden");
