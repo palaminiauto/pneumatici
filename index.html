@@ -59,8 +59,8 @@
         <input type="radio" name="tipologiacliente" value="NOLEGGI" id="tipNoleggi" onchange="aggiornaVisibilita()">
         <label for="tipNoleggi">NOLEGGI<br><small style="font-size:13px;">(Arval, UnipolRental, Leasys etc.)</small></label>
         </div>
-      <div style="display:none; color:red; font-size:14px; margin-top:8px;text-align:center">
-          Nel campo nome e cognome inserire anche il nome della società di noleggio scritto sul libretto di circolazione
+      <div id="msgNoleggi" style="display:none; color:red; font-size:14px; margin-top:8px;text-align:center">
+          ⚠️ Nel campo nome e cognome inserire anche il nome della società di noleggio scritto sul libretto di circolazione
         </div>
 
       <div id="depositoContainer" class="hidden">
@@ -231,15 +231,18 @@ function aggiornaVisibilita(){
   const depositoContainer = document.getElementById("depositoContainer");
   const campiAuto = document.getElementById("campiAuto");
   const campiContatti = document.getElementById("campiContatti");
+  const msgNoleggi = document.getElementById("msgNoleggi");
 
   if(cliente === "PRIVATO"){
     depositoContainer.classList.remove("hidden");
     campiAuto.classList.add("hidden");
     campiContatti.classList.add("hidden");
+    msgNoleggi.style.display = "none";
   } else if(cliente === "NOLEGGI") {
     depositoContainer.classList.add("hidden");
     campiAuto.classList.remove("hidden");
     campiContatti.classList.remove("hidden");
+    msgNoleggi.style.display = "block";
   }
 
   document.querySelectorAll('input[name="dep"]').forEach(el => el.checked = false);
