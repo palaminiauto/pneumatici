@@ -179,27 +179,38 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.85); 
+    background: rgba(0,0,0,0.9); 
     z-index: 9999; 
-    display: flex;
     align-items: center;
     justify-content: center;
+    text-align: center; 
+    padding: 40px 30px; 
+    font-size: 18px; 
+    font-weight: bold; 
+    line-height: 1.6;
   }
-
- #successOverlay > *, #errorOverlay > * {
-    background: white;
-    padding: 40px 30px;
-    border-radius: 12px;
-    max-width: 90%;
-}
 
   #successOverlay {
     color: #2e7d32;
-    border: 3px solid #4caf50;
   }
 
   #errorOverlay {
     color: #c62828;
+  }
+
+  #successOverlay > div, #errorOverlay > div {
+    background: white;
+    padding: 40px 30px;
+    border-radius: 12px;
+    max-width: 90%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+
+  #successOverlay > div {
+    border: 3px solid #4caf50;
+  }
+
+  #errorOverlay > div {
     border: 3px solid #f44336;
   }
   
@@ -325,15 +336,19 @@
   </div>
 
   <div id="successOverlay">
-    ✅ MODULO INVIATO CORRETTAMENTE<br><br>
-    Si ricorda che è obbligatorio presentarsi in officina il giorno dell'appuntamento con la mail appena ricevuta (controllare anche lo SPAM).<br><br>
-    Grazie.
+    <div>
+      ✅ MODULO INVIATO CORRETTAMENTE<br><br>
+      Si ricorda che è obbligatorio presentarsi in officina il giorno dell'appuntamento con la mail appena ricevuta (controllare anche lo SPAM).<br><br>
+      Grazie.
+    </div>
   </div>
 
   <div id="errorOverlay">
-    ❌ ERRORE NELL'INVIO DEI DATI<br><br>
-    Si è verificato un problema durante l'invio della prenotazione.<br><br>
-    Ti preghiamo di riprovare.
+    <div>
+      ❌ ERRORE NELL'INVIO DEI DATI<br><br>
+      Si è verificato un problema durante l'invio della prenotazione.<br><br>
+      Ti preghiamo di riprovare.
+    </div>
   </div>
 
 <script>
@@ -580,22 +595,22 @@ async function invia(){
       console.log('✅ Prenotazione confermata');
       document.getElementById("formWrapper").style.display = "none";
       const overlay = document.getElementById("successOverlay");
-      overlay.style.display = "block";
+      overlay.style.display = "flex";
       overlay.scrollIntoView({behavior:"smooth", block:"center"});
     } else {
       console.error('❌ Errore server:', result.error);
+      document.getElementById("formWrapper").style.display = "none";
       const errorOverlay = document.getElementById("errorOverlay");
-      errorOverlay.style.display = "block";
+      errorOverlay.style.display = "flex";
       errorOverlay.scrollIntoView({behavior:"smooth", block:"center"});
-      btn.disabled = false;
     }
   } catch(error) {
     console.error('❌ Errore fetch:', error);
     document.getElementById("sendingOverlay").style.display = "none";
+    document.getElementById("formWrapper").style.display = "none";
     const errorOverlay = document.getElementById("errorOverlay");
-    errorOverlay.style.display = "block";
+    errorOverlay.style.display = "flex";
     errorOverlay.scrollIntoView({behavior:"smooth", block:"center"});
-    btn.disabled = false;
   }
 }
 </script>
